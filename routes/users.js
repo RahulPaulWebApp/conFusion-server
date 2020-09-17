@@ -9,8 +9,14 @@ var authenticate = require('../authenticate');
 router.use(bodyParser.json());
 
 /* GET users listing. */
-router.get('/', function(req, res, next) {
-  res.send('respond with a resource');
+router.get('/',authenticate.verifyUser, authenticate.verifyAdmin, function(req, res, next) {
+    User.find({})
+    .then(users =>{
+      res.statusCode = 200;
+      res.setHeader('Content-Type', "application/json");
+      res.json(users);
+    }, (err)=>next(err))
+    .catch(err=> next(err))      
 });
 
 router.post('/signup', (req, res, next) => {
@@ -42,27 +48,7 @@ router.post('/signup', (req, res, next) => {
     }
   });
 });
-// router.post('/signup', (req, res, next) => {
-//   User.findOne({username: req.body.username})
-//   .then((user) => {
-//     if(user != null) {
-//       var err = new Error('User ' + req.body.username + ' already exists!');
-//       err.status = 403;
-//       next(err);
-//     }
-//     else {
-//       return User.create({
-//         username: req.body.username,
-//         password: req.body.password});
-//     }
-//   })
-//   .then((user) => {
-//     res.statusCode = 200;
-//     res.setHeader('Content-Type', 'application/json');
-//     res.json({status: 'Registration Successful!', user: user});
-//   }, (err) => next(err))
-//   .catch((err) => next(err));
-// });
+
 
 router.post('/login', passport.authenticate('local'), (req, res) => {
 
